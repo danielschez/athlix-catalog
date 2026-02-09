@@ -17,7 +17,7 @@ export default function Filters() {
   return (
     <aside className="filters">
       <h2>Filtros</h2>
-
+      {/*
       <section>
         <h3>Género</h3>
         <label className="filter-option">
@@ -41,7 +41,8 @@ export default function Filters() {
           <span className="filter-label">Niña</span>
         </label>
       </section>
-
+      */}
+      {/* 
       <section>
         <h3>Comprar por precio</h3>
         <label className="filter-option">
@@ -53,7 +54,7 @@ export default function Filters() {
           <span className="filter-label">$2,500 - $5,000</span>
         </label>
       </section>
-
+      */}
       <section>
         <h3>Tallas</h3>
         <div className="size-grid">
@@ -69,6 +70,7 @@ export default function Filters() {
         </div>
       </section>
 
+        {/*
       <section>
         <h3>Color</h3>
         <label className="filter-option">
@@ -84,6 +86,7 @@ export default function Filters() {
           <span className="filter-label">Gris</span>
         </label>
       </section>
+      */}
     </aside>
   );
 }
