@@ -85,17 +85,17 @@ export default function Home() {
         <section style={{ flex: 1 }}>
           <div className="listing-header">
             <div className="listing-title">
-              <h2>Calzado para Hombre ({products.length})</h2>
+              <h2>Calzado ({products.length})</h2>
             </div>
             
-            <div className="sort-controls">
+           {/* <div className="sort-controls">
               <button className="sort-button">
                 Ocultar filtros
               </button>
               <button className="sort-button">
                 Ordenar por
               </button>
-            </div>
+            </div> */}
           </div>
 
           <ProductGrid products={products} />

@@ -2,12 +2,12 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-800">
       <div className="container header">
-        <h1 className="logo">NIKE</h1>
+        <img src="/logo.avif" alt="Grillo logo" className="logo" />
 
         <nav className="nav">
-          <a href="#">Hombre</a>
-          <a href="#">Mujer</a>
-          <a href="#">Ayuda</a>
+          <a href="#">Calzado</a>
+          <a href="#">Ropa</a>
+          <a href="#">Otros</a>
         </nav>
       </div>
     </header>
