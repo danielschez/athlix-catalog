@@ -1,22 +1,26 @@
 /* src/components/ProductCard.jsx */
+import { useCart } from "../context/CartContext";
+
 export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
+
   return (
     <article className="product-card">
       <div className="image-wrapper">
-        <img src={product.image} alt={product.name} loading="lazy" />
+        <img src={product.image} alt={product.name} />
       </div>
 
       <div className="product-info">
-        {product.tag && (
-          <div className="product-tags">
-            <span className="tag">{product.tag}</span>
-          </div>
-        )}
-        
         <h3>{product.name}</h3>
-        <p className="category">{product.category}</p>
-        <p className="color-count">{product.colors} colores</p>
-        <p className="price">${product.price.toLocaleString('es-MX')}</p>
+        <p className="category">Calzado para Hombre</p>
+        <p className="price">${product.price}</p>
+
+        <button
+          className="add-cart"
+          onClick={() => addToCart(product)}
+        >
+          Añadir al carrito
+        </button>
       </div>
     </article>
   );

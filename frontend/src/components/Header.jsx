@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export default function Header() {
@@ -8,7 +9,6 @@ export default function Header() {
       <div className="container header">
         <img src="/logo.avif" alt="Grillo logo" className="logo" />
 
-        {/* Botón hamburguesa (solo móvil) */}
         <button
           className="menu-btn"
           onClick={() => setOpen(!open)}
@@ -17,11 +17,10 @@ export default function Header() {
           ☰
         </button>
 
-        {/* Navegación */}
         <nav className={`nav ${open ? "open" : ""}`}>
-          <a href="#">Calzado</a>
-          <a href="#">Ropa</a>
-          <a href="#">Otros</a>
+          <Link to="/calzado">Calzado</Link>
+          <Link to="/ropa">Ropa</Link>
+          <Link to="/accesorios">Accesorios</Link>
         </nav>
       </div>
     </header>
