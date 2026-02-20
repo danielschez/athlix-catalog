@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+// src/pages/Calzado.jsx
 import { useState } from "react";
 import Header from "../components/Header";
 import Filters from "../components/Filters";

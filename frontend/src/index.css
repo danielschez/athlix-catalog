@@ -172,6 +172,23 @@ img {
   cursor: pointer;
 }
 
+.filters button {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  background: transparent;
+  border: 1px solid #333;
+  color: white;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.filters button.active,
+.filters button:hover {
+  background: white;
+  color: black;
+}
+
 /* Listing Header */
 .listing-header {
   display: flex;
