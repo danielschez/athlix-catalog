@@ -7,7 +7,9 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-800">
       <div className="container header">
-        <img src="/logo.avif" alt="Grillo logo" className="logo" />
+        <Link to="/">
+          <img src="/logo.avif" alt="Grillo logo" className="logo" />
+        </Link>
 
         <button
           className="menu-btn"
