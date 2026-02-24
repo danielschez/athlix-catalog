@@ -586,3 +586,150 @@ img {
 .add-to-cart-btn:active {
   transform: scale(0.97);
 }
+
+/* Contenedor general del carrito */
+.cart-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cart-container h1 {
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Grid de productos y resumen */
+.cart-grid {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+/* Productos */
+.cart-items {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-item-card {
+  display: flex;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.cart-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.cart-item-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+}
+
+.cart-item-info {
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #000;
+}
+
+.cart-item-price {
+  font-weight: 600;
+  color: #111;
+}
+
+.cart-item-qty {
+  font-size: 14px;
+  color: #555;
+}
+
+.cart-remove-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #f44336;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.25s ease;
+}
+
+.cart-remove-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+}
+
+/* Resumen */
+.cart-summary {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.cart-summary h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+}
+
+.checkout-btn {
+  padding: 12px;
+  background: #111;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.checkout-btn:hover {
+  background: #000;
+  transform: translateY(-2px);
+}
+
+.clear-cart-btn {
+  padding: 12px;
+  background: #f0f0f0;
+  color: #111;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.clear-cart-btn:hover {
+  background: #e0e0e0;
+}
+
+/* Empty cart */
+.empty-cart {
+  padding: 50px 0;
+  text-align: center;
+  font-size: 18px;
+  color: #555;
+}
