@@ -34,7 +34,7 @@ export default function Home() {
               <img src={cat.image} alt={cat.title} />
               <div className="category-overlay">
                 <h2>{cat.title}</h2>
-                <button>Comprar</button>
+                <button>Seleccionar</button>
               </div>
             </Link>
           ))}
