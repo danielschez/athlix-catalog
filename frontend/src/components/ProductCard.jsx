@@ -11,15 +11,16 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="product-info">
-        <h3>{product.name}</h3>
-        <p className="category">Calzado para Hombre</p>
-        <p className="price">${product.price}</p>
+        {product.tag && <span className="product-tag">{product.tag}</span>}
+        <h3 className="product-name">{product.name}</h3>
+        <p className="product-category">Calzado para Hombre</p>
+        <p className="product-price">${product.price}</p>
 
         <button
-          className="add-cart"
+          className="add-to-cart-btn"
           onClick={() => addToCart(product)}
         >
-          Añadir al carrito
+          🛒 Añadir al carrito
         </button>
       </div>
     </article>

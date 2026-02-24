@@ -3,8 +3,10 @@ import { useState } from "react";
 import Header from "../components/Header";
 import Filters from "../components/Filters";
 import ProductGrid from "../components/ProductGrid";
+import { useCart } from "../context/CartContext";
 
 export default function Home() {
+  const { addToCart } = useCart();
   const [products] = useState([
     {
       id: 1,
