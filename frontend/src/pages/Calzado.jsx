@@ -86,16 +86,10 @@ export default function Home() {
           <div className="listing-header">
             <div className="listing-title">
               <h2>Calzado ({products.length})</h2>
+               <button onClick={() => addToCart(producto)}>
+                Agregar al carrito
+              </button>
             </div>
-            
-           {/* <div className="sort-controls">
-              <button className="sort-button">
-                Ocultar filtros
-              </button>
-              <button className="sort-button">
-                Ordenar por
-              </button>
-            </div> */}
           </div>
 
           <ProductGrid products={products} />

@@ -1,8 +1,11 @@
+//components/Header.jsx
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useCart } from "../context/CartContext";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const { totalItems } = useCart();
 
   return (
     <header className="border-b border-neutral-800">
@@ -23,6 +26,9 @@ export default function Header() {
           <Link to="/calzado">Calzado</Link>
           <Link to="/ropa">Ropa</Link>
           <Link to="/accesorios">Accesorios</Link>
+          <Link to="/carrito" className="cart-link">
+            🛒 {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
+          </Link>
         </nav>
       </div>
     </header>
