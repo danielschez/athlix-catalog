@@ -6,6 +6,7 @@ import Calzado from "./pages/Calzado";
 import Ropa from "./pages/Ropa";
 import Accesorios from "./pages/Accesorios";
 import Carrito from "./pages/Carrito";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/accesorios" element={<Accesorios />} />
         <Route path="/carrito" element={<Carrito />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

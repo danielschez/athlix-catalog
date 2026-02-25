@@ -26,8 +26,12 @@ export default function Header() {
           <Link to="/calzado">Calzado</Link>
           <Link to="/ropa">Ropa</Link>
           <Link to="/accesorios">Accesorios</Link>
-          <Link to="/carrito" className="cart-link">
-            🛒 {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
+          <Link to="/carrito" className="cart-link desktop-only">
+            <span className="cart-icon">🛒</span>
+            <span className="cart-text">Carrito</span>
+            {totalItems > 0 && (
+              <span className="cart-count">{totalItems}</span>
+            )}
           </Link>
         </nav>
       </div>
