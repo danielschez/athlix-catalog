@@ -9,7 +9,7 @@ export default function Carrito() {
     <>
       <Header />
       <main className="cart-container">
-        <h1>Tu Carrito</h1>
+        <h1 style={{ color: "#FF9900" }}>Tu Carrito</h1>
 
         {cart.length === 0 ? (
           <div className="empty-cart">
