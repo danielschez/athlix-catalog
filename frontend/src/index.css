@@ -47,21 +47,36 @@ button {
 
 img {
   width: 100%;
+  height: auto;
   display: block;
 }
 
 /* Header */
 .header {
-  height: 60px;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .logo {
+  height: 40px;
   width: 120px;
-  height: 60px;
   object-fit: contain;
+}
+
+.logo-text {
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 .nav {
@@ -182,7 +197,7 @@ img {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    color: #111;
+    color: #ffffff;
   }
 
   .cart-icon {
@@ -190,7 +205,7 @@ img {
     width: 40px;
     height: 40px;  
     border-radius: 50%;
-    border: 0.8px solid #111;
+    border: 0.8px solid #710b0b;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -303,7 +318,8 @@ img {
   width: 100%;
   margin-bottom: 8px;
   background: transparent;
-  border: 1px solid #333;
+  /*border: 1px solid #333;*/
+  border: 1px solid #b60808;
   color: white;
   padding: 8px;
   cursor: pointer;
@@ -311,8 +327,9 @@ img {
 
 .filters button.active,
 .filters button:hover {
-  background: white;
-  color: black;
+  background: rgb(9, 9, 9);
+  color: rgb(246, 245, 245);
+  text-align: center;
 }
 
 /* Listing Header */

@@ -10,8 +10,9 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-800">
       <div className="container header">
-        <Link to="/">
+        <Link to="/" className="logo-container">
           <img src="/logo.avif" alt="Grillo logo" className="logo" />
+          <span className="logo-text">Grillo Shop</span>
         </Link>
 
         <button
