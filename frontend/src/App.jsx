@@ -4,6 +4,10 @@ import Home from "./pages/Home";
 import Calzado from "./pages/Calzado";
 import Ropa from "./pages/Ropa";
 import Accesorios from "./pages/Accesorios";
+import Gorras from "./pages/Gorras";
+import Uniformes from "./pages/Uniformes";
+import About from "./pages/About";
+import Barberia from "./pages/Barberia";
 import Carrito from "./pages/Carrito";
 import Footer from "./components/Footer";
 
@@ -11,7 +15,8 @@ function AppWrapper() {
   const location = useLocation();
 
   // Ocultar footer si la ruta es "/carrito"
-  const showFooter = location.pathname !== "/carrito";
+  const hiddenFooterRoutes = ["/carrito", "/barberia"];
+  const showFooter = !hiddenFooterRoutes.includes(location.pathname);
 
   return (
     <>
@@ -21,6 +26,10 @@ function AppWrapper() {
         <Route path="/ropa" element={<Ropa />} />
         <Route path="/accesorios" element={<Accesorios />} />
         <Route path="/carrito" element={<Carrito />} />
+        <Route path="/gorras" element={<Gorras />} />
+        <Route path="/uniformes" element={<Uniformes />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/barberia" element={<Barberia />} />
       </Routes>
 
       {showFooter && <Footer />}

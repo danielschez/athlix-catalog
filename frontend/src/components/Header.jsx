@@ -26,7 +26,11 @@ export default function Header() {
         <nav className={`nav ${open ? "open" : ""}`}>
           <Link to="/calzado">Calzado</Link>
           <Link to="/ropa">Ropa</Link>
+          <Link to="/gorras">Gorras</Link>
+          <Link to="/uniformes">Uniformes</Link>
           <Link to="/accesorios">Accesorios</Link>
+          <Link to="/about">Sobre Grillo Shop</Link>
+          <Link to="/barberia">Barbería - Grillo Cuts</Link>
           <Link to="/carrito" className="cart-link desktop-only">
             <span className="cart-icon">🛒</span>
             <span className="cart-text">Carrito</span>
