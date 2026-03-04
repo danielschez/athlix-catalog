@@ -1,6 +1,7 @@
 // src/pages/Uniformes.jsx
 import { useState } from "react";
 import Header from "../components/Header";
+import Filters from "../components/Filters";
 import ProductGrid from "../components/ProductGrid";
 
 export default function Uniformes() {
@@ -22,11 +23,33 @@ export default function Uniformes() {
     },
   ]);
 
+  const uniformesFilters = [
+    {
+      title: "Tipo de Uniforme",
+      type: "checkbox",
+      options: [
+        "Uniforme Deportivo",
+        "Uniforme Personalizado",
+      ],
+    },
+    {
+      title: "Precio",
+      type: "checkbox",
+      options: [
+        "Menos de $800",
+        "$800 - $1,000",
+        "Más de $1,000",
+      ],
+    },
+  ];
+
   return (
     <>
       <Header />
 
       <main className="container layout">
+        <Filters config={uniformesFilters} />
+
         <section style={{ flex: 1 }}>
           <div className="listing-header">
             <div className="listing-title">

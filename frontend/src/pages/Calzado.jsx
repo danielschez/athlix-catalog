@@ -77,12 +77,43 @@ export default function Home() {
     },
   ]);
 
+  const calzadoFilters = [
+  {
+    title: "Categoría",
+    type: "checkbox",
+    options: [
+      "Sneakers",
+      "Tachos de Fútbol",
+      "Bebés & Niños",
+      "Tenis sobre Pedido",
+      "Sandalias & Chanclas",
+      "Ofertas",
+    ],
+  },
+  {
+    title: "Tallas",
+    type: "buttons",
+    options: [
+      "22.0 | 22.5",
+      "23.0 | 23.5",
+      "24.0",
+      "24.5 | 25.0",
+      "25.0 | 25.5",
+      "26.0",
+      "26.5 | 27.0",
+      "27.0 | 27.5",
+      "28.0",
+      "29.0",
+    ],
+  },
+];
+
   return (
     <>
       <Header />
 
       <main className="container layout">
-        <Filters />
+        <Filters config={calzadoFilters} />
 
         <section style={{ flex: 1 }}>
           <div className="listing-header">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "../components/Header";
+import Filters from "../components/Filters";
 import ProductGrid from "../components/ProductGrid";
 import Seo from "../components/Seo";
 
@@ -40,6 +41,28 @@ export default function Ropa() {
     return genderMatch && sizeMatch;
   });
 
+  const ropaFilters = [
+  {
+    title: "Categoría",
+    type: "checkbox",
+    options: [
+      "Hombre",
+      "Mujer",
+      "Playeras",
+      "Sudaderas & Chamarras",
+      "Conjuntos",
+      "Shorts",
+      "Calcetas",
+      "Jerseys Deportivos",
+    ],
+  },
+  {
+    title: "Tallas",
+    type: "buttons",
+    options: ["XS", "S", "M", "L", "XL", "XXL"],
+  },
+];
+
   return (
     <>
       <Seo
@@ -50,32 +73,7 @@ export default function Ropa() {
       <Header />
 
       <main className="container layout">
-        {/* FILTROS */}
-        <aside className="filters">
-          <h3>Género</h3>
-          {["Todos", "Hombre", "Mujer", "Niño", "Niña"].map((g) => (
-            <button
-              key={g}
-              className={gender === g ? "active" : ""}
-              onClick={() => setGender(g)}
-            >
-              {g}
-            </button>
-          ))}
-
-          <h3>Talla</h3>
-          {["Todas", "XS", "S", "M", "L", "XL"].map((s) => (
-            <button
-              key={s}
-              className={size === s ? "active" : ""}
-              onClick={() => setSize(s)}
-            >
-              {s}
-            </button>
-          ))}
-        </aside>
-
-        {/* LISTADO */}
+        <Filters config={ropaFilters} />
         <section style={{ flex: 1 }}>
           <div className="listing-header">
             <h2>Ropa ({filteredProducts.length})</h2>

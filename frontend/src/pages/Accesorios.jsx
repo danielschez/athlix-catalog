@@ -1,4 +1,6 @@
+//src/pages/Accesorios.jsx
 import Header from "../components/Header";
+import Filters from "../components/Filters";
 import ProductGrid from "../components/ProductGrid";
 import Seo from "../components/Seo";
 
@@ -23,6 +25,30 @@ const PRODUCTS = [
   },
 ];
 
+const accesoriosFilters = [
+  {
+    title: "Categoría",
+    type: "checkbox",
+    options: [
+      "Bolsas & Mochilas",
+      "Balones",
+      "Cinturones",
+      "Lentes",
+      "Figuras Coleccionables",
+      "Otros",
+    ],
+  },
+  {
+    title: "Precio",
+    type: "checkbox",
+    options: [
+      "Menos de $500",
+      "$500 - $1,000",
+      "Más de $1,000",
+    ],
+  },
+];
+
 export default function Accesorios() {
   return (
     <>
@@ -34,6 +60,8 @@ export default function Accesorios() {
       <Header />
 
       <main className="container layout">
+        <Filters config={accesoriosFilters} />
+
         <section style={{ flex: 1 }}>
           <div className="listing-header">
             <h2>Accesorios ({PRODUCTS.length})</h2>
