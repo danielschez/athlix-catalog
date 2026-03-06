@@ -904,3 +904,176 @@ img {
   font-size: 18px;
   color: #555;
 }
+
+/* ── Filter Chip Bar (mobile only) ── */
+.filter-chips-bar {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .filters--desktop {
+    display: none;
+  }
+
+  .filter-chips-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 0 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: 16px;
+  }
+
+  .filter-chips-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid #555;
+    background: transparent;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .filter-chip--icon {
+    padding: 8px 12px;
+    position: relative;
+  }
+
+  .filter-chip--active {
+    border-color: #fff;
+    background: #1a1a1a;
+  }
+
+  .chip-count {
+    background: #fff;
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+  }
+}
+
+/* ── Filter Modal ── */
+.filter-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+}
+
+.filter-modal {
+  background: #fff;
+  color: #111;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.filter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filter-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+}
+
+.filter-modal-close {
+  font-size: 18px;
+  color: #111;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.filter-modal-body {
+  max-height: 50vh;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.filter-modal-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+  color: #111;
+  cursor: pointer;
+}
+
+.filter-modal-option input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: #111;
+  cursor: pointer;
+}
+
+.filter-modal-footer {
+  padding-top: 8px;
+}
+
+.filter-modal-apply {
+  width: 100%;
+  padding: 16px;
+  background: #111;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.filter-modal-apply:hover {
+  opacity: 0.85;
+}
+
+.filter-modal .size-button {
+  border-color: #ccc;
+  color: #111;
+  background: transparent;
+}
+
+.filter-modal .size-button.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.filter-modal .size-button:hover {
+  border-color: #111;
+}
