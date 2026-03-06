@@ -14,6 +14,16 @@ const categories = [
     path: "/ropa",
   },
   {
+    title: "Gorras",
+    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b",
+    path: "/gorras",
+  },
+  {
+    title: "Uniformes",
+    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55",
+    path: "/uniformes",
+  },
+  {
     title: "Accesorios",
     image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519",
     path: "/accesorios",
