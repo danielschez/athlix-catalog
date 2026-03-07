@@ -1,5 +1,6 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Calzado from "./pages/Calzado";
 import Ropa from "./pages/Ropa";
@@ -15,12 +16,13 @@ function AppWrapper() {
   const location = useLocation();
 
   // Ocultar footer si la ruta es "/carrito"
-  const hiddenFooterRoutes = ["/carrito", "/barberia"];
+  const hiddenFooterRoutes = ["/carrito", "/barberia", "/about", "/login"];
   const showFooter = !hiddenFooterRoutes.includes(location.pathname);
 
   return (
     <>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Home />} />
         <Route path="/calzado" element={<Calzado />} />
         <Route path="/ropa" element={<Ropa />} />
