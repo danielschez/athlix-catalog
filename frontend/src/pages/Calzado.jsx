@@ -119,9 +119,6 @@ export default function Home() {
           <div className="listing-header">
             <div className="listing-title">
               <h2>Calzado ({products.length})</h2>
-               <button onClick={() => addToCart(producto)}>
-                Agregar al carrito
-              </button>
             </div>
           </div>
 

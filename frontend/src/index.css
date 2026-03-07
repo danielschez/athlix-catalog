@@ -494,6 +494,9 @@ img {
 }
 
 @media (max-width: 640px) {
+  .category-card {
+    height: 220px;
+  }
   .container {
     padding: 0 20px;
   }
@@ -709,8 +712,8 @@ img {
 }
 
 .product-card:hover {
-  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.15);
-  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.12);
+  transform: translateY(-6px);
 }
 
 .product-name {
@@ -731,7 +734,7 @@ img {
 }
 
 .product-tag {
-  background: #b60808;
+  background: #e01010;
   color: #fff;
   font-weight: 600;
   font-size: 12px;
@@ -859,7 +862,8 @@ img {
 
 .cart-item-card {
   display: flex;
-  background: #fff;
+  background: #111;
+  border: 1px solid #222;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
@@ -887,25 +891,25 @@ img {
 .cart-item-name {
   font-weight: 600;
   font-size: 16px;
-  color: #000;
+  color: #fff;
 }
 
 .cart-item-price {
   font-weight: 600;
-  color: #111;
+  color: #fff;
 }
 
 .cart-item-qty {
   font-size: 14px;
-  color: #555;
+  color: #888;
 }
 
 .cart-remove-btn {
   padding: 8px 12px;
   border-radius: 8px;
-  border: none;
-  background: #f44336;
-  color: white;
+  background: transparent;
+  border: 1px solid #b60808;
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
   align-self: flex-start;
@@ -913,14 +917,15 @@ img {
 }
 
 .cart-remove-btn:hover {
-  background: #d32f2f;
+  background: #b60808;
   transform: translateY(-1px);
 }
 
 /* Resumen */
 .cart-summary {
   flex: 1;
-  background: #fff;
+  background: #111;
+  border: 1px solid #222;
   border-radius: 12px;
   padding: 20px;
   height: fit-content;
@@ -933,7 +938,11 @@ img {
 .cart-summary h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: #fff;
+}
+
+.cart-summary p {
+  color: #fff;
 }
 
 .checkout-btn {
@@ -954,8 +963,8 @@ img {
 
 .clear-cart-btn {
   padding: 12px;
-  background: #f0f0f0;
-  color: #111;
+  background: #222;
+  color: #fff;
   font-weight: 600;
   border: none;
   border-radius: 10px;
@@ -964,7 +973,7 @@ img {
 }
 
 .clear-cart-btn:hover {
-  background: #e0e0e0;
+  background: #333;
 }
 
 /* Empty cart */
