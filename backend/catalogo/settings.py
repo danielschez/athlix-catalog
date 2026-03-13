@@ -1,15 +1,22 @@
-import os
 from pathlib import Path
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9iv9*^4$-p*#y!yolra3hm)!9gm+857=xtta!ed*f9)fpplhs^'
+SECRET_KEY = 'django-insecure-th=kjxd4cr!ttobnpqg=!)=j%0-5vgs^n#lrt7dvh9vc$a%@t_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -21,14 +28,26 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'jazzmin',
+    'rest_framework',
+    'productos',
+    'catalogo',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'catalog_app',
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Panel Administrativo",
+    "site_header": "Mi Proyecto",
+    "site_brand": "Admin",
+    "welcome_sign": "Bienvenido al sistema",
+    "copyright": "Mi Empresa",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -40,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'catalog.urls'
+ROOT_URLCONF = 'catalogo.urls'
 
 TEMPLATES = [
     {
@@ -57,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'catalog.wsgi.application'
+WSGI_APPLICATION = 'catalogo.wsgi.application'
 
 
 # Database
@@ -93,9 +112,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "es-mx"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "America/Mexico_City"
 
 USE_I18N = True
 
@@ -106,7 +125,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
