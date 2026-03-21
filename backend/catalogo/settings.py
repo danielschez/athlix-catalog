@@ -4,6 +4,7 @@ from decouple import config
 from dotenv import load_dotenv
 from django.conf import settings
 from django.conf.urls.static import static
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,8 +37,10 @@ CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 INSTALLED_APPS = [
     'jazzmin',
     'rest_framework',
+    'rest_framework_simplejwt',
     'productos',
     'catalogo',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +59,25 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':  timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS':  True,
+}
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'productos.auth_backend.UsuarioRegistradoBackend',
+]
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,6 +105,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'catalogo.wsgi.application'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 
 # Database

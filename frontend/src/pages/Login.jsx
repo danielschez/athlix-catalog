@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { registrarUsuario, loginUsuario } from "../api/auth";
 import Header from "../components/Header";
 
 export default function Login() {
@@ -9,6 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [modo, setModo] = useState("login");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ correo: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
@@ -19,17 +21,37 @@ export default function Login() {
     telefono: "",
   });
 
-  const handleLogin = () => {
+  // ======================================================
+  // LOGIN
+  // ======================================================
+  const handleLogin = async () => {
     setError("");
+
     if (!loginForm.correo || !loginForm.password) {
       setError("Por favor completa todos los campos.");
       return;
     }
-    login({ nombre: loginForm.correo.split("@")[0], correo: loginForm.correo });
-    navigate("/");
+
+    setLoading(true);
+    try {
+      const data = await loginUsuario(loginForm);
+      // data tiene: access, refresh, usuario
+      login(data.usuario, {
+        access:  data.access,
+        refresh: data.refresh,
+      });
+      navigate("/");
+    } catch (err) {
+      setError(err?.detail || "Correo o contraseña incorrectos.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = () => {
+  // ======================================================
+  // REGISTRO
+  // ======================================================
+  const handleRegister = async () => {
     setError("");
     const { nombre, correo, password, confirmPassword, telefono } = registerForm;
 
@@ -50,8 +72,30 @@ export default function Login() {
       return;
     }
 
-    login({ nombre, correo });
-    navigate("/");
+    setLoading(true);
+    try {
+      // 1. Registrar
+      await registrarUsuario({ nombre, correo, telefono, password });
+
+      // 2. Login automático con las mismas credenciales
+      const data = await loginUsuario({ correo, password });
+
+      // 3. Guardar sesión
+      login(data.usuario, {
+        access:  data.access,
+        refresh: data.refresh,
+      });
+
+      navigate("/");
+    } catch (err) {
+      if (err?.correo)   { setError(err.correo[0]);   return; }
+      if (err?.telefono) { setError(err.telefono[0]); return; }
+      if (err?.nombre)   { setError(err.nombre[0]);   return; }
+      if (err?.password) { setError(err.password[0]); return; }
+      setError("Ocurrió un error al registrarse. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,8 +143,12 @@ export default function Login() {
                 onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
               />
 
-              <button className="auth-submit-btn" onClick={handleLogin}>
-                Entrar
+              <button
+                className="auth-submit-btn"
+                onClick={handleLogin}
+                disabled={loading}
+              >
+                {loading ? "Entrando..." : "Entrar"}
               </button>
             </div>
           )}
@@ -153,8 +201,12 @@ export default function Login() {
                 onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
               />
 
-              <button className="auth-submit-btn" onClick={handleRegister}>
-                Crear cuenta
+              <button
+                className="auth-submit-btn"
+                onClick={handleRegister}
+                disabled={loading}
+              >
+                {loading ? "Creando cuenta..." : "Crear cuenta"}
               </button>
             </div>
           )}
