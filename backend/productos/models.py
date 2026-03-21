@@ -3,49 +3,142 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db import IntegrityError
+import hashlib
 
+from .encryption import encryptor
 
-# =========================================================
-# USUARIOS REGISTRADOS (CLIENTES DE LA TIENDA)
-# =========================================================
 
 class UsuarioRegistrado(models.Model):
-    nombre = models.CharField(max_length=255)
 
-    correo = models.EmailField(
-        unique=True
-    )
+    # ============================
+    # CAMPOS ENCRIPTADOS (DB)
+    # ============================
+    _nombre   = models.CharField(db_column='nombre',   null=True, blank=True)
+    _correo   = models.CharField(db_column='correo',   null=True, blank=True)
+    _telefono = models.CharField(db_column='telefono', null=True, blank=True)
 
-    password = models.CharField(
-        max_length=255
-    )
-
-    telefono = models.CharField(
-        max_length=20,
+    # ============================
+    # HASHES PARA BÚSQUEDA
+    # ============================
+    correo_hash = models.CharField(
+        max_length=64,
+        db_index=True,
+        editable=False,
+        null=True,
         blank=True,
-        null=True
     )
 
-    creado = models.DateTimeField(
-        auto_now_add=True
+    telefono_hash = models.CharField(
+        max_length=64,
+        db_index=True,
+        editable=False,
+        null=True,
+        blank=True,
     )
 
-    activo = models.BooleanField(
-        default=True
-    )
+    # ============================
+    # OTROS CAMPOS
+    # ============================
+    password = models.CharField(max_length=255)
+    creado   = models.DateTimeField(auto_now_add=True)
+    activo   = models.BooleanField(default=True)
 
+    # ============================
+    # HASH HELPERS
+    # ============================
+    @staticmethod
+    def hash_email(value):
+        return hashlib.sha256(value.strip().lower().encode()).hexdigest()
+
+    @staticmethod
+    def hash_phone(value):
+        return hashlib.sha256(value.strip().encode()).hexdigest()
+
+    # ============================
+    # PROPERTIES
+    # ============================
+    @property
+    def nombre(self):
+        return encryptor.decrypt(self._nombre) if self._nombre else ''
+
+    @nombre.setter
+    def nombre(self, value):
+        self._nombre = encryptor.encrypt(value) if value else ''
+
+    @property
+    def correo(self):
+        return encryptor.decrypt(self._correo) if self._correo else ''
+
+    @correo.setter
+    def correo(self, value):
+        if value:
+            value = value.strip().lower()
+            self._correo     = encryptor.encrypt(value)
+            self.correo_hash = self.hash_email(value)
+        else:
+            self._correo     = ''
+            self.correo_hash = None
+
+    @property
+    def telefono(self):
+        return encryptor.decrypt(self._telefono) if self._telefono else ''
+
+    @telefono.setter
+    def telefono(self, value):
+        if value:
+            value = value.strip()
+            self._telefono     = encryptor.encrypt(value)
+            self.telefono_hash = self.hash_phone(value)
+        else:
+            self._telefono     = ''
+            self.telefono_hash = None
+
+    # ============================
+    # VALIDACIÓN
+    # ============================
+    def clean(self):
+        errors = {}
+
+        if self.correo_hash and UsuarioRegistrado.objects.filter(
+            correo_hash=self.correo_hash
+        ).exclude(pk=self.pk).exists():
+            errors["correo"] = "Este correo electrónico ya está registrado."
+
+        if self.telefono_hash and UsuarioRegistrado.objects.filter(
+            telefono_hash=self.telefono_hash
+        ).exclude(pk=self.pk).exists():
+            errors["telefono"] = "Este número de teléfono ya está registrado."
+
+        if errors:
+            raise ValidationError(errors)
+
+    # ============================
+    # SAVE
+    # ============================
     def save(self, *args, **kwargs):
-        # Encriptar contraseña automáticamente
+        self.full_clean()
+
         if not self.password.startswith("pbkdf2_"):
             self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+
+        try:
+            super().save(*args, **kwargs)
+        except IntegrityError:
+            raise ValidationError({
+                "general": "El correo o teléfono ya existe en la base de datos."
+            })
 
     def __str__(self):
-        return self.nombre
+        return self.nombre or "Usuario"
+
+    class Meta:
+        verbose_name        = "Usuario Registrado"
+        verbose_name_plural = "Usuarios Registrados"
 
 
 # =========================================================
-# CATEGORÍAS (JERÁRQUICAS)
+# CATEGORÍAS
 # =========================================================
 
 class Categoria(models.Model):
@@ -72,17 +165,11 @@ class Categoria(models.Model):
 class Talla(models.Model):
     TIPO_TALLA = [
         ("calzado", "Calzado"),
-        ("ropa", "Ropa"),
+        ("ropa",    "Ropa"),
     ]
 
-    talla = models.CharField(
-        max_length=10
-    )  # XS, S, M, 26.5, etc.
-
-    tipo = models.CharField(
-        max_length=10,
-        choices=TIPO_TALLA
-    )
+    talla = models.CharField(max_length=10)
+    tipo  = models.CharField(max_length=10, choices=TIPO_TALLA)
 
     categorias = models.ManyToManyField(
         Categoria,
@@ -99,13 +186,9 @@ class Talla(models.Model):
 # =========================================================
 
 class Producto(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre      = models.CharField(max_length=255)
+    descripcion = models.TextField(blank=True)
 
-    descripcion = models.TextField(
-        blank=True
-    )
-
-    # Precio opcional
     precio = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -119,63 +202,37 @@ class Producto(models.Model):
         related_name="productos"
     )
 
-    tallas = models.ManyToManyField(
-        "Talla",
-        blank=True
-    )
+    tallas = models.ManyToManyField("Talla", blank=True)
+    stock  = models.PositiveIntegerField(default=0)
+    activo = models.BooleanField(default=True)
 
-    # Stock
-    stock = models.PositiveIntegerField(
-        default=0
-    )
+    imagen1 = models.ImageField(upload_to="productos/", blank=True, null=True)
+    imagen2 = models.ImageField(upload_to="productos/", blank=True, null=True)
+    imagen3 = models.ImageField(upload_to="productos/", blank=True, null=True)
 
-    # Activo (se desactiva cuando stock = 0)
-    activo = models.BooleanField(
-        default=True
-    )
-
-    # Máximo 3 imágenes
-    imagen1 = models.ImageField(
-        upload_to="productos/",
-        blank=True,
-        null=True
-    )
-
-    imagen2 = models.ImageField(
-        upload_to="productos/",
-        blank=True,
-        null=True
-    )
-
-    imagen3 = models.ImageField(
-        upload_to="productos/",
-        blank=True,
-        null=True
-    )
-
-    creado = models.DateTimeField(auto_now_add=True)
+    creado      = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # Auto-desactivar si no hay stock
-        if self.stock <= 0:
-            self.activo = False
-        else:
-            self.activo = True
-
+        self.activo = self.stock > 0
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
-    
+
+
+# =========================================================
+# PEDIDOS
+# =========================================================
+
 class Pedido(models.Model):
 
     ESTADOS = [
-        ("pendiente", "Pendiente"),
+        ("pendiente",  "Pendiente"),
         ("procesando", "Procesando"),
-        ("enviado", "Enviado"),
-        ("entregado", "Entregado"),
-        ("cancelado", "Cancelado"),
+        ("enviado",    "Enviado"),
+        ("entregado",  "Entregado"),
+        ("cancelado",  "Cancelado"),
     ]
 
     usuario = models.ForeignKey(
@@ -184,59 +241,35 @@ class Pedido(models.Model):
         related_name="pedidos"
     )
 
-    fecha = models.DateTimeField(default=timezone.now)
-
-    estado = models.CharField(
-        max_length=20,
-        choices=ESTADOS,
-        default="pendiente"
-    )
-
-    total = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0
-    )
+    fecha  = models.DateTimeField(default=timezone.now)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente")
+    total  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def actualizar_total(self):
-        total = sum(det.subtotal for det in self.detalles.all())
-        self.total = total
+        self.total = sum(det.subtotal for det in self.detalles.all())
         self.save()
 
     def __str__(self):
         return f"Pedido #{self.id} — {self.usuario.nombre}"
-    
+
+
+# =========================================================
+# DETALLE PEDIDO
+# =========================================================
+
 class DetallePedido(models.Model):
 
-    pedido = models.ForeignKey(
-        Pedido,
-        on_delete=models.CASCADE,
-        related_name="detalles"
-    )
+    pedido   = models.ForeignKey(Pedido,   on_delete=models.CASCADE, related_name="detalles")
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
 
-    producto = models.ForeignKey(
-        Producto,
-        on_delete=models.CASCADE
-    )
-
-    cantidad = models.PositiveIntegerField(default=1)
-
-    precio_unitario = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-
-    subtotal = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    cantidad        = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal        = models.DecimalField(max_digits=10, decimal_places=2)
 
     def save(self, *args, **kwargs):
         self.subtotal = self.precio_unitario * self.cantidad
         super().save(*args, **kwargs)
-
         self.pedido.actualizar_total()
 
     def __str__(self):
         return f"{self.producto.nombre} x {self.cantidad}"
-    

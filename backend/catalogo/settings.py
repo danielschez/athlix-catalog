@@ -1,27 +1,34 @@
+import os
 from pathlib import Path
+from decouple import config
+from dotenv import load_dotenv
 from django.conf import settings
 from django.conf.urls.static import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-th=kjxd4cr!ttobnpqg=!)=j%0-5vgs^n#lrt7dvh9vc$a%@t_'
+SECRET_KEY = config('SECRET_KEY')
+
+# Configuration for Fernet encryption
+FERNET_KEY = config('FERNET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+render_hostname = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
+
+# CORS y CSRF
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin]
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
 
 # Application definition
@@ -41,10 +48,10 @@ INSTALLED_APPS = [
 
 JAZZMIN_SETTINGS = {
     "site_title": "Panel Administrativo",
-    "site_header": "Mi Proyecto",
-    "site_brand": "Admin",
+    "site_header": "Grillo Shop Admin",
+    "site_brand": "Grillo Shop",
     "welcome_sign": "Bienvenido al sistema",
-    "copyright": "Mi Empresa",
+    "copyright": "Grillo Shop",
     "show_sidebar": True,
     "navigation_expanded": True,
 }
