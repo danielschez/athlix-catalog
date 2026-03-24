@@ -1,15 +1,19 @@
 // src/components/Filters.jsx
 import { useState } from "react";
 
-export default function Filters({ config }) {
+export default function Filters({ config, onFilterChange }) {
   const [selected, setSelected] = useState([]);
   const [activeModal, setActiveModal] = useState(null);
   const [pendingSelected, setPendingSelected] = useState([]);
 
   const toggleOption = (value) => {
-    setSelected((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
+    setSelected((prev) => {
+      const next = prev.includes(value)
+        ? prev.filter((v) => v !== value)
+        : [...prev, value];
+      onFilterChange?.(next); // ← notifica al padre
+      return next;
+    });
   };
 
   const openModal = (section) => {
@@ -21,6 +25,7 @@ export default function Filters({ config }) {
 
   const applyModal = () => {
     setSelected([...pendingSelected]);
+    onFilterChange?.(pendingSelected); // ← notifica al padre
     setActiveModal(null);
   };
 
