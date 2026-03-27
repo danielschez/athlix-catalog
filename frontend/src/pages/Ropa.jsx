@@ -9,8 +9,15 @@ import { useProductos } from "../hooks/useProductos";
 const CATEGORIA_ROPA_ID = 2;
 
 export default function Ropa() {
-  const { productos, tallas, loading, error } = useProductos(CATEGORIA_ROPA_ID);
+  const { productos, tallas, categorias, loading, error } = useProductos(CATEGORIA_ROPA_ID);
   const [selected, setSelected] = useState([]);
+
+  const subcategorias = useMemo(
+    () => categorias
+      .filter((c) => c.padre === CATEGORIA_ROPA_ID)
+      .map((c) => c.nombre),
+    [categorias]
+  );
 
   const tallasRopa = useMemo(
     () => tallas.filter((t) => t.tipo === "ropa"),
@@ -23,25 +30,41 @@ export default function Ropa() {
     return map;
   }, [tallasRopa]);
 
+  const categoriaMap = useMemo(() => {
+    const map = {};
+    categorias.forEach((c) => { map[c.nombre] = c.id; });
+    return map;
+  }, [categorias]);
+
   const ropaFilters = useMemo(() => [
     {
       title: "Categoría",
       type: "checkbox",
-      options: ["Hombre", "Mujer", "Playeras", "Sudaderas & Chamarras", "Conjuntos", "Shorts"],
+      options: subcategorias,
     },
     {
       title: "Tallas",
       type: "buttons",
       options: tallasRopa.map((t) => t.talla),
     },
-  ], [tallasRopa]);
+  ], [subcategorias, tallasRopa]);
 
   const productosFiltrados = useMemo(() => {
     if (selected.length === 0) return productos;
-    return productos.filter((p) =>
-      p.tallas?.some((id) => selected.includes(tallaMap[id]))
-    );
-  }, [productos, selected, tallaMap]);
+
+    const categoriasSeleccionadas = selected.filter((s) => subcategorias.includes(s));
+    const tallasSeleccionadas     = selected.filter((s) => !subcategorias.includes(s));
+
+    return productos.filter((p) => {
+      const categoriaOk = categoriasSeleccionadas.length === 0
+        || categoriasSeleccionadas.some((nombre) => categoriaMap[nombre] === p.categoria);
+
+      const tallaOk = tallasSeleccionadas.length === 0
+        || p.tallas?.some((id) => tallasSeleccionadas.includes(tallaMap[id]));
+
+      return categoriaOk && tallaOk;
+    });
+  }, [productos, selected, subcategorias, categoriaMap, tallaMap]);
 
   return (
     <>

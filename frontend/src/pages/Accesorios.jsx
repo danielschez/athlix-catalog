@@ -6,38 +6,60 @@ import ProductGrid from "../components/ProductGrid";
 import Seo from "../components/Seo";
 import { useProductos } from "../hooks/useProductos";
 
-const CATEGORIA_ACCESORIOS_ID = 3; // ID de categoría para accesorios, debe coincidir con el backend
+const CATEGORIA_ACCESORIOS_ID = 15;
 
 export default function Accesorios() {
-  const { productos, loading, error } = useProductos(CATEGORIA_ACCESORIOS_ID);
+  const { productos, categorias, loading, error } = useProductos(CATEGORIA_ACCESORIOS_ID);
   const [selected, setSelected] = useState([]);
 
-  const accesoriosFilters = [
+  const subcategorias = useMemo(
+    () => categorias
+      .filter((c) => c.padre === CATEGORIA_ACCESORIOS_ID)
+      .map((c) => c.nombre),
+    [categorias]
+  );
+
+  const categoriaMap = useMemo(() => {
+    const map = {};
+    categorias.forEach((c) => { map[c.nombre] = c.id; });
+    return map;
+  }, [categorias]);
+
+  const accesoriosFilters = useMemo(() => [
     {
       title: "Categoría",
       type: "checkbox",
-      options: ["Bolsas & Mochilas", "Balones", "Cinturones", "Lentes", "Otros"],
+      options: subcategorias,
     },
     {
       title: "Precio",
       type: "checkbox",
       options: ["Menos de $500", "$500 - $1,000", "Más de $1,000"],
     },
-  ];
+  ], [subcategorias]);
 
-  // Filtro de precio en el cliente
   const productosFiltrados = useMemo(() => {
     if (selected.length === 0) return productos;
+
+    const categoriasSeleccionadas = selected.filter((s) => subcategorias.includes(s));
+    const preciosSeleccionados    = selected.filter((s) => !subcategorias.includes(s));
+
     return productos.filter((p) => {
+      const categoriaOk = categoriasSeleccionadas.length === 0
+        || categoriasSeleccionadas.some((nombre) => categoriaMap[nombre] === p.categoria);
+
       const precio = Number(p.precio);
-      return selected.some((f) => {
-        if (f === "Menos de $500")    return precio < 500;
-        if (f === "$500 - $1,000")    return precio >= 500 && precio <= 1000;
-        if (f === "Más de $1,000")    return precio > 1000;
-        return false;
-      });
+      const precioOk = preciosSeleccionados.length === 0
+        || preciosSeleccionados.some((f) => {
+          if (f === "Menos de $500")  return precio < 500;
+          if (f === "$500 - $1,000")  return precio >= 500 && precio <= 1000;
+          if (f === "Más de $1,000")  return precio > 1000;
+          return false;
+        });
+
+      return categoriaOk && precioOk;
     });
-  }, [productos, selected]);
+  }, [productos, selected, subcategorias, categoriaMap]);
 
   return (
     <>

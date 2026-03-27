@@ -1,43 +1,76 @@
 // src/pages/Gorras.jsx
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Header from "../components/Header";
+import Filters from "../components/Filters";
 import ProductGrid from "../components/ProductGrid";
-import { useCart } from "../context/CartContext";
+import { useProductos } from "../hooks/useProductos";
+
+const CATEGORIA_GORRAS_ID = 14;
 
 export default function Gorras() {
-  const { addToCart } = useCart();
+  const { productos, categorias, loading, error } = useProductos(CATEGORIA_GORRAS_ID);
+  const [selected, setSelected] = useState([]);
 
-  const [products] = useState([
+  const subcategorias = useMemo(
+    () => categorias
+      .filter((c) => c.padre === CATEGORIA_GORRAS_ID)
+      .map((c) => c.nombre),
+    [categorias]
+  );
+
+  const categoriaMap = useMemo(() => {
+    const map = {};
+    categorias.forEach((c) => { map[c.nombre] = c.id; });
+    return map;
+  }, [categorias]);
+
+  const gorrasFilters = useMemo(() => [
+    ...(subcategorias.length > 0 ? [{
+      title: "Categoría",
+      type: "checkbox",
+      options: subcategorias,
+    }] : []),
     {
-      id: 1,
-      name: "Gorra Snapback Negra",
-      category: "Gorras",
-      price: 499,
-      image: "https://images.unsplash.com/photo-1521369909029-2afed882baee",
-      tag: "Nueva",
+      title: "Precio",
+      type: "checkbox",
+      options: ["Menos de $500", "$500 - $1,000", "Más de $1,000"],
     },
-    {
-      id: 2,
-      name: "Gorra Trucker Roja",
-      category: "Gorras",
-      price: 599,
-      image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c",
-    },
-  ]);
+  ], [subcategorias]);
+
+  const productosFiltrados = useMemo(() => {
+    if (selected.length === 0) return productos;
+
+    const categoriasSeleccionadas = selected.filter((s) => subcategorias.includes(s));
+    const preciosSeleccionados    = selected.filter((s) => !subcategorias.includes(s));
+
+    return productos.filter((p) => {
+      const categoriaOk = categoriasSeleccionadas.length === 0
+        || categoriasSeleccionadas.some((nombre) => categoriaMap[nombre] === p.categoria);
+
+      const precio = Number(p.precio);
+      const precioOk = preciosSeleccionados.length === 0
+        || preciosSeleccionados.some((f) => {
+          if (f === "Menos de $500")  return precio < 500;
+          if (f === "$500 - $1,000")  return precio >= 500 && precio <= 1000;
+          if (f === "Más de $1,000")  return precio > 1000;
+          return false;
+        });
+
+      return categoriaOk && precioOk;
+    });
+  }, [productos, selected, subcategorias, categoriaMap]);
 
   return (
     <>
       <Header />
-
       <main className="container layout">
+        <Filters config={gorrasFilters} onFilterChange={setSelected} />
         <section style={{ flex: 1 }}>
           <div className="listing-header">
-            <div className="listing-title">
-              <h2>Gorras ({products.length})</h2>
-            </div>
+            <h2>Gorras ({productosFiltrados.length})</h2>
           </div>
-
-          <ProductGrid products={products} />
+          {error && <p className="auth-error">{error}</p>}
+          <ProductGrid products={productosFiltrados} loading={loading} />
         </section>
       </main>
     </>
