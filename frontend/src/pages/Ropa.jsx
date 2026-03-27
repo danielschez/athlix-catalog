@@ -6,11 +6,22 @@ import ProductGrid from "../components/ProductGrid";
 import Seo from "../components/Seo";
 import { useProductos } from "../hooks/useProductos";
 
-const CATEGORIA_ROPA_ID = 2; // ID de categoría para ropa, debe coincidir con el backend
+const CATEGORIA_ROPA_ID = 2;
 
 export default function Ropa() {
   const { productos, tallas, loading, error } = useProductos(CATEGORIA_ROPA_ID);
   const [selected, setSelected] = useState([]);
+
+  const tallasRopa = useMemo(
+    () => tallas.filter((t) => t.tipo === "ropa"),
+    [tallas]
+  );
+
+  const tallaMap = useMemo(() => {
+    const map = {};
+    tallasRopa.forEach((t) => { map[t.id] = t.talla; });
+    return map;
+  }, [tallasRopa]);
 
   const ropaFilters = useMemo(() => [
     {
@@ -21,18 +32,16 @@ export default function Ropa() {
     {
       title: "Tallas",
       type: "buttons",
-      options: tallas
-        .filter((t) => t.tipo === "ropa")
-        .map((t) => t.talla),
+      options: tallasRopa.map((t) => t.talla),
     },
-  ], [tallas]);
+  ], [tallasRopa]);
 
   const productosFiltrados = useMemo(() => {
     if (selected.length === 0) return productos;
     return productos.filter((p) =>
-      p.tallas?.some((t) => selected.includes(t))
+      p.tallas?.some((id) => selected.includes(tallaMap[id]))
     );
-  }, [productos, selected]);
+  }, [productos, selected, tallaMap]);
 
   return (
     <>
