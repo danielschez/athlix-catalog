@@ -27,7 +27,7 @@ export async function loginUsuario({ correo, password }) {
 
 // Llama a endpoints protegidos con el token
 export async function fetchConAuth(url, opciones = {}) {
-  const access = localStorage.getItem("access_token");
+  const access = sessionStorage.getItem("access_token");
 
   const res = await fetch(`${BASE_URL}${url}`, {
     ...opciones,
@@ -53,7 +53,7 @@ export async function fetchConAuth(url, opciones = {}) {
 }
 
 async function refrescarToken() {
-  const refresh = localStorage.getItem("refresh_token");
+  const refresh = sessionStorage.getItem("refresh_token");
   if (!refresh) return false;
 
   const res = await fetch(`${BASE_URL}/auth/refresh/`, {
@@ -65,6 +65,6 @@ async function refrescarToken() {
   if (!res.ok) return false;
 
   const data = await res.json();
-  localStorage.setItem("access_token", data.access);
+  sessionStorage.setItem("access_token", data.access);
   return true;
 }

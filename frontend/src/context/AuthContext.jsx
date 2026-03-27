@@ -5,22 +5,26 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("usuario");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = sessionStorage.getItem("usuario");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   const login = (userData, tokens) => {
     setUser(userData);
-    localStorage.setItem("usuario",       JSON.stringify(userData));
-    localStorage.setItem("access_token",  tokens.access);
-    localStorage.setItem("refresh_token", tokens.refresh);
+    sessionStorage.setItem("usuario",       JSON.stringify(userData));
+    sessionStorage.setItem("access_token",  tokens.access);
+    sessionStorage.setItem("refresh_token", tokens.refresh);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("usuario");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
   };
 
   return (

@@ -1,10 +1,22 @@
 // src/context/CartContext.jsx
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+
+  const [cart, setCart] = useState(() => {
+  try {
+    const saved = sessionStorage.getItem("carrito");
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+});
+
+  useEffect(() => {
+    sessionStorage.setItem("carrito", JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (product) => {
     setCart((prev) => {
@@ -24,7 +36,10 @@ export function CartProvider({ children }) {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    sessionStorage.removeItem("carrito");
+  };
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 

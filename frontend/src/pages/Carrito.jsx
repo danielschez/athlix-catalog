@@ -1,15 +1,55 @@
 // src/pages/Carrito.jsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Carrito() {
   const { cart, removeFromCart, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate  = useNavigate();
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
+  const [loading, setLoading]             = useState(false);
+  const [error, setError]                 = useState("");
 
-  const handleSolicitarPedido = () => {
-    setPedidoEnviado(true);
-    clearCart();
+  const handleSolicitarPedido = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/pedidos/crear/", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuario_id: user.id,
+          items: cart.map((item) => ({
+            id:       item.id,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Error al crear el pedido.");
+        return;
+      }
+
+      clearCart();
+      setPedidoEnviado(true);
+
+    } catch {
+      setError("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,8 +115,21 @@ export default function Carrito() {
                 <strong>Total</strong>
                 <strong>${Number(totalPrice).toLocaleString("es-MX")}</strong>
               </div>
-              <button className="checkout-btn" onClick={handleSolicitarPedido}>
-                📦 Solicitar Pedido
+
+              {error && <p className="auth-error">{error}</p>}
+
+              {!user && (
+                <p className="auth-error">
+                  Inicia sesión para solicitar tu pedido.
+                </p>
+              )}
+
+              <button
+                className="checkout-btn"
+                onClick={handleSolicitarPedido}
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "📦 Solicitar Pedido"}
               </button>
               <button className="clear-cart-btn" onClick={clearCart}>
                 Vaciar carrito
