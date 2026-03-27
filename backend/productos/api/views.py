@@ -1,5 +1,7 @@
 # backend/productos/api/views.py
-from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, viewsets
 from productos.models import (
     UsuarioRegistrado, Categoria, Talla,
     Producto, Pedido, DetallePedido,
@@ -69,3 +71,62 @@ class PedidoViewSet(viewsets.ModelViewSet):
 class DetallePedidoViewSet(viewsets.ModelViewSet):
     queryset         = DetallePedido.objects.all()
     serializer_class = DetallePedidoSerializer
+
+
+class CrearPedidoView(APIView):
+    authentication_classes = []
+    permission_classes     = []
+
+    def post(self, request):
+        usuario_id = request.data.get("usuario_id")
+        items      = request.data.get("items", [])
+
+        if not usuario_id or not items:
+            return Response(
+                {"detail": "usuario_id e items son requeridos."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            usuario = UsuarioRegistrado.objects.get(pk=usuario_id, activo=True)
+        except UsuarioRegistrado.DoesNotExist:
+            return Response(
+                {"detail": "Usuario no encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Crea el pedido
+        pedido = Pedido.objects.create(usuario=usuario, estado="pendiente")
+
+        errores = []
+        for item in items:
+            try:
+                producto = Producto.objects.get(pk=item["id"], activo=True)
+                cantidad = int(item["quantity"])
+
+                if producto.stock < cantidad:
+                    errores.append(f"{producto.nombre}: stock insuficiente.")
+                    continue
+
+                DetallePedido.objects.create(
+                    pedido          = pedido,
+                    producto        = producto,
+                    cantidad        = cantidad,
+                    precio_unitario = producto.precio,
+                )
+
+                # Descuenta stock
+                producto.stock -= cantidad
+                producto.save()
+
+            except Producto.DoesNotExist:
+                errores.append(f"Producto ID {item['id']} no encontrado.")
+
+        pedido.actualizar_total()
+
+        return Response({
+            "pedido_id": pedido.id,
+            "total":     str(pedido.total),
+            "estado":    pedido.estado,
+            "errores":   errores,
+        }, status=status.HTTP_201_CREATED)
