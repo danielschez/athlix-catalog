@@ -19,6 +19,8 @@ SECRET_KEY = config('SECRET_KEY')
 # Configuration for Fernet encryption
 FERNET_KEY = config('FERNET_KEY')
 
+RECAPTCHA_SECRET_KEY = config('RECAPTCHA_SECRET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
