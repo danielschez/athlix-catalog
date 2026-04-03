@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 function resolverImagen(url) {
   if (!url) return null;
