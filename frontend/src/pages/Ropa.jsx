@@ -24,12 +24,6 @@ export default function Ropa() {
     [tallas]
   );
 
-  const tallaMap = useMemo(() => {
-    const map = {};
-    tallasRopa.forEach((t) => { map[t.id] = t.talla; });
-    return map;
-  }, [tallasRopa]);
-
   const categoriaMap = useMemo(() => {
     const map = {};
     categorias.forEach((c) => { map[c.nombre] = c.id; });
@@ -59,12 +53,13 @@ export default function Ropa() {
       const categoriaOk = categoriasSeleccionadas.length === 0
         || categoriasSeleccionadas.some((nombre) => categoriaMap[nombre] === p.categoria);
 
+      // p.tallas ahora son objetos — compara por talla_nombre
       const tallaOk = tallasSeleccionadas.length === 0
-        || p.tallas?.some((id) => tallasSeleccionadas.includes(tallaMap[id]));
+        || p.tallas?.some((t) => tallasSeleccionadas.includes(t.talla_nombre));
 
       return categoriaOk && tallaOk;
     });
-  }, [productos, selected, subcategorias, categoriaMap, tallaMap]);
+  }, [productos, selected, subcategorias, categoriaMap]);
 
   return (
     <>

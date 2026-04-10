@@ -1,7 +1,12 @@
 /* src/components/ProductGrid.jsx */
 import ProductCard from "./ProductCard";
 
-export default function ProductGrid({ products, loading = false }) {
+export default function ProductGrid({
+  products = [],
+  loading = false,
+  tallasSeleccionadas = {},
+  onTallaChange = null,
+}) {
   if (loading) {
     return (
       <section className="grid">
@@ -17,7 +22,9 @@ export default function ProductGrid({ products, loading = false }) {
     );
   }
 
-  if (products.length === 0) {
+  const lista = Array.isArray(products) ? products : [];
+
+  if (lista.length === 0) {
     return (
       <div className="empty-state">
         <h3>No se encontraron productos</h3>
@@ -28,8 +35,13 @@ export default function ProductGrid({ products, loading = false }) {
 
   return (
     <section className="grid">
-      {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+      {lista.map((p) => (
+        <ProductCard
+          key={`product-${p.id}`}
+          product={p}
+          tallaSeleccionada={tallasSeleccionadas[p.id] || null}
+          onTallaChange={onTallaChange}
+        />
       ))}
     </section>
   );

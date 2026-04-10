@@ -6,13 +6,14 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 export default function Carrito() {
-  const { cart, removeFromCart, totalPrice, clearCart } = useCart();
-  const { user } = useAuth();
-  const navigate  = useNavigate();
+  const { cart, removeFromCart, totalPrice, clearCart, itemKey } = useCart();
+  const { user }   = useAuth();
+  const navigate   = useNavigate();
+  const API_URL    = import.meta.env.VITE_API_URL;
+
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState("");
-  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleSolicitarPedido = async () => {
     if (!user) {
@@ -32,6 +33,7 @@ export default function Carrito() {
           items: cart.map((item) => ({
             id:       item.id,
             quantity: item.quantity,
+            talla_id: item.talla_id || null,
           })),
         }),
       });
@@ -81,12 +83,19 @@ export default function Carrito() {
                 const nombre = item.nombre || item.name  || "Producto";
                 const precio = item.precio || item.price || 0;
                 const imagen = item.imagen || item.image || "https://placehold.co/100x100?text=Sin+imagen";
+                const key    = itemKey(item);
 
                 return (
-                  <div key={item.id} className="cart-item-card">
+                  <div key={key} className="cart-item-card">
                     <img src={imagen} alt={nombre} />
                     <div className="cart-item-info">
                       <h3 className="cart-item-name">{nombre}</h3>
+
+                      {/* Muestra talla si tiene */}
+                      {item.talla && (
+                        <p className="cart-item-talla">Talla: {item.talla}</p>
+                      )}
+
                       <p className="cart-item-price">
                         ${Number(precio).toLocaleString("es-MX")}
                       </p>
@@ -96,7 +105,7 @@ export default function Carrito() {
                       </p>
                       <button
                         className="cart-remove-btn"
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(key)}
                       >
                         Eliminar
                       </button>

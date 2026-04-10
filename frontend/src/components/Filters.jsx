@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 export default function Filters({ config, onFilterChange }) {
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState([]);  // ← sin llamar onFilterChange aquí
   const [activeModal, setActiveModal] = useState(null);
   const [pendingSelected, setPendingSelected] = useState([]);
 
@@ -11,7 +11,7 @@ export default function Filters({ config, onFilterChange }) {
       const next = prev.includes(value)
         ? prev.filter((v) => v !== value)
         : [...prev, value];
-      onFilterChange?.(next); // ← notifica al padre
+      onFilterChange?.(next);
       return next;
     });
   };
@@ -25,7 +25,7 @@ export default function Filters({ config, onFilterChange }) {
 
   const applyModal = () => {
     setSelected([...pendingSelected]);
-    onFilterChange?.(pendingSelected); // ← notifica al padre
+    onFilterChange?.(pendingSelected);
     setActiveModal(null);
   };
 
@@ -84,6 +84,7 @@ export default function Filters({ config, onFilterChange }) {
                 {section.options.map((opt) => (
                   <button
                     key={opt}
+                    type="button"
                     className={`size-button ${selected.includes(opt) ? "active" : ""}`}
                     onClick={() => toggleOption(opt)}
                   >
@@ -134,6 +135,7 @@ export default function Filters({ config, onFilterChange }) {
                   {activeModal.options.map((opt) => (
                     <button
                       key={opt}
+                      type="button"
                       className={`size-button ${pendingSelected.includes(opt) ? "active" : ""}`}
                       onClick={() => togglePending(opt)}
                     >

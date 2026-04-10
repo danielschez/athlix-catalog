@@ -1,18 +1,25 @@
 // src/components/ProductCard.jsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useCart } from "../context/CartContext";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 function resolverImagen(url) {
   if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
   return `${BASE_URL}${url}`;
 }
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
+
   const [imgIndex, setImgIndex] = useState(0);
+  const [error, setError] = useState("");
+  const [tallaSeleccionada, setTallaSeleccionada] = useState(null);
 
   const imagenes = [
     resolverImagen(product.imagen1),
@@ -26,7 +33,8 @@ export default function ProductCard({ product }) {
 
   const nombre = product.nombre || product.name || "Producto";
   const precio = product.precio || product.price || 0;
-  const tallas = product.tallas || [];
+  const tallas = Array.isArray(product.tallas) ? product.tallas : [];
+  const tieneTallas = tallas.length > 0;
 
   const prev = (e) => {
     e.stopPropagation();
@@ -38,30 +46,75 @@ export default function ProductCard({ product }) {
     setImgIndex((i) => (i + 1) % imagenes.length);
   };
 
+  const seleccionarTalla = useCallback((talla) => {
+    if (talla.stock <= 0) return;
+
+    setTallaSeleccionada(talla);
+    setError("");
+  }, []);
+
+  const handleAgregarAlCarrito = () => {
+    setError("");
+
+    if (tieneTallas && !tallaSeleccionada) {
+      setError("Selecciona una talla");
+      return;
+    }
+
+    const productoCarrito = {
+      id: product.id,
+      nombre,
+      precio: Number(precio),
+      imagen: imagenes[0],
+      quantity: 1,
+      talla_id: tallaSeleccionada?.id || null,
+      talla: tallaSeleccionada?.talla_nombre || null,
+    };
+
+    addToCart(productoCarrito);
+
+    setTallaSeleccionada(null);
+    setError("");
+  };
+
   return (
     <article className="product-card">
-
-      {/* CARRUSEL */}
       <div className="image-wrapper">
-        <img src={imagenes[imgIndex]} alt={`${nombre} ${imgIndex + 1}`} />
+        <img
+          src={imagenes[imgIndex]}
+          alt={`${nombre} ${imgIndex + 1}`}
+        />
 
-        {/* Flechas — solo si hay más de una imagen */}
         {imagenes.length > 1 && (
           <>
-            <button className="carousel-btn carousel-btn--prev" onClick={prev}>
+            <button
+              type="button"
+              className="carousel-btn carousel-btn--prev"
+              onClick={prev}
+            >
               ‹
             </button>
-            <button className="carousel-btn carousel-btn--next" onClick={next}>
+
+            <button
+              type="button"
+              className="carousel-btn carousel-btn--next"
+              onClick={next}
+            >
               ›
             </button>
 
-            {/* Dots */}
             <div className="carousel-dots">
               {imagenes.map((_, i) => (
                 <button
                   key={i}
-                  className={`carousel-dot ${i === imgIndex ? "active" : ""}`}
-                  onClick={(e) => { e.stopPropagation(); setImgIndex(i); }}
+                  type="button"
+                  className={`carousel-dot ${
+                    i === imgIndex ? "active" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImgIndex(i);
+                  }}
                 />
               ))}
             </div>
@@ -70,17 +123,36 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="product-info">
-        {product.tag && <span className="product-tag">{product.tag}</span>}
+        {product.tag && (
+          <span className="product-tag">{product.tag}</span>
+        )}
+
         <h3 className="product-name">{nombre}</h3>
 
-        {tallas.length > 0 && (
+        {tieneTallas && (
           <div className="product-sizes">
-            {tallas.slice(0, 4).map((t) => (
-              <span key={t} className="size-badge">{t}</span>
+            {tallas.map((talla) => (
+              <button
+                key={talla.id}
+                type="button"
+                className={`size-badge ${
+                  tallaSeleccionada?.id === talla.id ? "active" : ""
+                } ${talla.stock === 0 ? "agotada" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  seleccionarTalla(talla);
+                }}
+                disabled={talla.stock === 0}
+                title={
+                  talla.stock === 0
+                    ? "Agotado"
+                    : `${talla.stock} disponibles`
+                }
+              >
+                {talla.talla_nombre}
+              </button>
             ))}
-            {tallas.length > 4 && (
-              <span className="size-badge">+{tallas.length - 4}</span>
-            )}
           </div>
         )}
 
@@ -88,14 +160,23 @@ export default function ProductCard({ product }) {
           ${Number(precio).toLocaleString("es-MX")}
         </p>
 
+        {tallaSeleccionada && (
+          <p className="stock-info">
+            {tallaSeleccionada.stock} disponibles en talla{" "}
+            {tallaSeleccionada.talla_nombre}
+          </p>
+        )}
+
+        {error && (
+          <div className="product-error-message">
+            {error}
+          </div>
+        )}
+
         <button
+          type="button"
           className="add-to-cart-btn"
-          onClick={() => addToCart({
-            id:     product.id,
-            nombre: nombre,
-            precio: Number(precio),
-            imagen: imagenes[0],
-          })}
+          onClick={handleAgregarAlCarrito}
         >
           🛒 Añadir al carrito
         </button>
