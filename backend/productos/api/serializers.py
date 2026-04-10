@@ -2,7 +2,7 @@
 import requests as http_requests
 from rest_framework import serializers
 from productos.models import (
-    UsuarioRegistrado, Categoria, Talla,
+    ProductoTalla, UsuarioRegistrado, Categoria, Talla,
     Producto, Pedido, DetallePedido
 )
 from django.conf import settings
@@ -13,40 +13,34 @@ class UsuarioRegistradoSerializer(serializers.ModelSerializer):
     correo   = serializers.EmailField()
     telefono = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
-    captcha  = serializers.CharField(write_only=True, required=False)  # ← opcional para no romper el admin
+    captcha  = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model  = UsuarioRegistrado
         fields = (
             "id", "nombre", "correo", "telefono",
-            "password", "captcha",               # ← captcha incluido en fields
+            "password", "captcha",
             "activo", "creado"
         )
         read_only_fields = ("id", "creado")
 
     def validate_captcha(self, token):
-        """Verifica el token con Google solo si viene en la request."""
         if not token:
             return token
-
         secret = getattr(settings, "RECAPTCHA_SECRET_KEY", None)
         if not secret:
-            return token  # si no hay clave configurada no bloquea
-
+            return token
         res    = http_requests.post(
             "https://www.google.com/recaptcha/api/siteverify",
             data={"secret": secret, "response": token},
             timeout=5,
         )
         result = res.json()
-
         if not result.get("success"):
             raise serializers.ValidationError("Captcha inválido. Intenta de nuevo.")
-
         return token
 
     def validate(self, data):
-        # Validar correo único
         correo_hash = UsuarioRegistrado.hash_email(data.get("correo", ""))
         qs = UsuarioRegistrado.objects.filter(correo_hash=correo_hash)
         if self.instance:
@@ -54,7 +48,6 @@ class UsuarioRegistradoSerializer(serializers.ModelSerializer):
         if qs.exists():
             raise serializers.ValidationError({"correo": "Este correo ya está registrado."})
 
-        # Validar teléfono único
         telefono = data.get("telefono", "")
         if telefono:
             telefono_hash = UsuarioRegistrado.hash_phone(telefono)
@@ -67,7 +60,7 @@ class UsuarioRegistradoSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop("captcha", None)  # ← no se guarda en la DB
+        validated_data.pop("captcha", None)
         obj          = UsuarioRegistrado()
         obj.nombre   = validated_data["nombre"]
         obj.correo   = validated_data["correo"]
@@ -78,16 +71,14 @@ class UsuarioRegistradoSerializer(serializers.ModelSerializer):
         return obj
 
     def update(self, instance, validated_data):
-        validated_data.pop("captcha", None)  # ← no se guarda en la DB
+        validated_data.pop("captcha", None)
         instance.nombre   = validated_data.get("nombre",   instance.nombre)
         instance.correo   = validated_data.get("correo",   instance.correo)
         instance.telefono = validated_data.get("telefono", instance.telefono)
         instance.activo   = validated_data.get("activo",   instance.activo)
-
         pwd = validated_data.get("password")
         if pwd:
             instance.password = pwd
-
         instance.save()
         return instance
 
@@ -104,11 +95,28 @@ class TallaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ProductoTallaSerializer(serializers.ModelSerializer):
+    talla_nombre = serializers.CharField(source="talla.talla", read_only=True)
+    talla_tipo   = serializers.CharField(source="talla.tipo",  read_only=True)
+
+    class Meta:
+        model  = ProductoTalla
+        fields = ("id", "talla", "talla_nombre", "talla_tipo", "stock")
+
 class ProductoSerializer(serializers.ModelSerializer):
+    tallas      = ProductoTallaSerializer(source="producto_tallas", many=True, read_only=True)
+    stock_total = serializers.IntegerField(read_only=True)
+    tiene_tallas = serializers.BooleanField(read_only=True)
+
     class Meta:
         model  = Producto
-        fields = "__all__"
-
+        fields = (
+            "id", "nombre", "descripcion", "precio",
+            "categoria", "tallas", "stock_total", "tiene_tallas",
+            "stock",
+            "activo", "imagen1", "imagen2", "imagen3",
+            "creado", "actualizado"
+        )
 
 class PedidoSerializer(serializers.ModelSerializer):
     class Meta:

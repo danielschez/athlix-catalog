@@ -202,8 +202,8 @@ class Producto(models.Model):
         related_name="productos"
     )
 
-    tallas = models.ManyToManyField("Talla", blank=True)
-    stock  = models.PositiveIntegerField(default=0)
+    stock = models.PositiveIntegerField(default=0)
+
     activo = models.BooleanField(default=True)
 
     imagen1 = models.ImageField(upload_to="productos/", blank=True, null=True)
@@ -213,13 +213,50 @@ class Producto(models.Model):
     creado      = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        self.activo = self.stock > 0
-        super().save(*args, **kwargs)
+    @property
+    def tiene_tallas(self):
+        return self.producto_tallas.exists()
+
+    @property
+    def stock_total(self):
+        if self.tiene_tallas:
+            return sum(pt.stock for pt in self.producto_tallas.all())
+        return self.stock
+
+    def actualizar_activo(self):
+        self.activo = self.stock_total > 0
+        Producto.objects.filter(pk=self.pk).update(activo=self.activo)
 
     def __str__(self):
         return self.nombre
 
+
+# =========================================================
+# PRODUCTO - TALLA (stock por talla)
+# =========================================================
+
+class ProductoTalla(models.Model):
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.CASCADE,
+        related_name="producto_tallas"
+    )
+
+    talla = models.ForeignKey(
+        Talla,
+        on_delete=models.CASCADE,
+        related_name="producto_tallas"
+    )
+
+    stock = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ("producto", "talla")
+        verbose_name        = "Talla del Producto"
+        verbose_name_plural = "Tallas del Producto"
+
+    def __str__(self):
+        return f"{self.producto.nombre} — {self.talla.talla}: {self.stock} uds"
 
 # =========================================================
 # PEDIDOS

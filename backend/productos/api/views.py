@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from productos.models import (
-    UsuarioRegistrado, Categoria, Talla,
+    ProductoTalla, UsuarioRegistrado, Categoria, Talla,
     Producto, Pedido, DetallePedido,
 )
 from .serializers import (
@@ -95,18 +95,37 @@ class CrearPedidoView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Crea el pedido
-        pedido = Pedido.objects.create(usuario=usuario, estado="pendiente")
-
+        pedido  = Pedido.objects.create(usuario=usuario, estado="pendiente")
         errores = []
+
         for item in items:
             try:
                 producto = Producto.objects.get(pk=item["id"], activo=True)
                 cantidad = int(item["quantity"])
+                talla_id = item.get("talla_id")
 
-                if producto.stock < cantidad:
-                    errores.append(f"{producto.nombre}: stock insuficiente.")
-                    continue
+                if producto.tiene_tallas:
+                    if not talla_id:
+                        errores.append(f"{producto.nombre}: debes seleccionar una talla.")
+                        continue
+
+                    try:
+                        pt = ProductoTalla.objects.get(producto=producto, talla_id=talla_id)
+                        if pt.stock < cantidad:
+                            errores.append(f"{producto.nombre} talla {pt.talla.talla}: stock insuficiente.")
+                            continue
+                        pt.stock -= cantidad
+                        pt.save()
+                    except ProductoTalla.DoesNotExist:
+                        errores.append(f"{producto.nombre}: talla no disponible.")
+                        continue
+
+                else:
+                    if producto.stock < cantidad:
+                        errores.append(f"{producto.nombre}: stock insuficiente.")
+                        continue
+                    producto.stock -= cantidad
+                    producto.save()
 
                 DetallePedido.objects.create(
                     pedido          = pedido,
@@ -115,9 +134,7 @@ class CrearPedidoView(APIView):
                     precio_unitario = producto.precio,
                 )
 
-                # Descuenta stock
-                producto.stock -= cantidad
-                producto.save()
+                producto.actualizar_activo()
 
             except Producto.DoesNotExist:
                 errores.append(f"Producto ID {item['id']} no encontrado.")

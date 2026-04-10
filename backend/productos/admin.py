@@ -1,3 +1,4 @@
+# backend/productos/admin.py
 from django.contrib import admin
 from django.contrib import messages
 from django import forms
@@ -7,6 +8,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from .models import (
+    ProductoTalla,
     UsuarioRegistrado,
     Categoria,
     Talla,
@@ -46,11 +48,9 @@ class UsuarioRegistradoForm(forms.ModelForm):
         obj.nombre   = self.cleaned_data["nombre"]
         obj.correo   = self.cleaned_data["correo"]
         obj.telefono = self.cleaned_data.get("telefono", "")
-
         pwd = self.cleaned_data.get("password")
         if pwd:
             obj.password = pwd
-
         if commit:
             obj.save()
         return obj
@@ -92,7 +92,6 @@ admin.site.register(Talla)
 # =========================================================
 
 class ImagenPreviewWidget(forms.ClearableFileInput):
-
     template_name = None
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -105,7 +104,17 @@ class ImagenPreviewWidget(forms.ClearableFileInput):
 
 
 # =========================================================
-# ADMIN PRODUCTO
+# INLINE TALLAS DEL PRODUCTO
+# =========================================================
+
+class ProductoTallaInline(admin.TabularInline):
+    model  = ProductoTalla
+    extra  = 1
+    fields = ("talla", "stock")
+
+
+# =========================================================
+# ADMIN PRODUCTO 
 # =========================================================
 
 @admin.register(Producto)
@@ -116,15 +125,23 @@ class ProductoAdmin(admin.ModelAdmin):
     }
 
     list_display = (
-        "nombre", "categoria", "mostrar_tallas",
+        "nombre", "categoria", "stock_total",
         "preview_imagen1", "preview_imagen2", "preview_imagen3",
     )
 
-    readonly_fields = ("preview_imagen1", "preview_imagen2", "preview_imagen3")
+    readonly_fields = (
+        "preview_imagen1", "preview_imagen2", "preview_imagen3",
+        "stock_total",
+    )
 
     fieldsets = (
         ("Información", {
-            "fields": ("nombre", "descripcion", "precio", "categoria", "tallas", "stock", "activo")
+            "fields": (
+                "nombre", "descripcion", "precio", "categoria",
+                "stock",
+                "stock_total",
+                "activo",
+            )
         }),
         ("Imágenes", {
             "fields": (
@@ -134,6 +151,8 @@ class ProductoAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    inlines = [ProductoTallaInline]
 
     def preview_imagen1(self, obj):
         if obj.imagen1:
@@ -150,10 +169,9 @@ class ProductoAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" width="120" style="border-radius:8px;" />', obj.imagen3.url)
         return "Sin imagen"
 
-    def mostrar_tallas(self, obj):
-        return ", ".join([t.talla for t in obj.tallas.all()]) or "Sin tallas"
-
-    mostrar_tallas.short_description = "Tallas"
+    def stock_total(self, obj):
+        return obj.stock_total
+    stock_total.short_description = "Stock total"
 
 
 # =========================================================
