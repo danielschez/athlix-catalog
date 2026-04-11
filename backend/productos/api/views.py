@@ -108,21 +108,35 @@ class CrearPedidoView(APIView):
                     if not talla_id:
                         errores.append(f"{producto.nombre}: debes seleccionar una talla.")
                         continue
-
                     try:
                         pt = ProductoTalla.objects.get(producto=producto, talla_id=talla_id)
+                        if pt.stock == 0:
+                            errores.append(
+                                f"Lo sentimos, {producto.nombre} talla {pt.talla.talla} "
+                                f"se acaba de agotar."
+                            )
+                            continue
                         if pt.stock < cantidad:
-                            errores.append(f"{producto.nombre} talla {pt.talla.talla}: stock insuficiente.")
+                            errores.append(
+                                f"Lo sentimos, de {producto.nombre} talla {pt.talla.talla} "
+                                f"solo quedan {pt.stock} "
+                                f"disponible{'s' if pt.stock != 1 else ''}."
+                            )
                             continue
                         pt.stock -= cantidad
                         pt.save()
                     except ProductoTalla.DoesNotExist:
-                        errores.append(f"{producto.nombre}: talla no disponible.")
+                        errores.append(f"{producto.nombre}: esa talla ya no está disponible.")
                         continue
-
                 else:
+                    if producto.stock == 0:
+                        errores.append(f"Lo sentimos, {producto.nombre} se acaba de agotar.")
+                        continue
                     if producto.stock < cantidad:
-                        errores.append(f"{producto.nombre}: stock insuficiente.")
+                        errores.append(
+                            f"Lo sentimos, de {producto.nombre} solo quedan {producto.stock} "
+                            f"disponible{'s' if producto.stock != 1 else ''}."
+                        )
                         continue
                     producto.stock -= cantidad
                     producto.save()
@@ -133,11 +147,10 @@ class CrearPedidoView(APIView):
                     cantidad        = cantidad,
                     precio_unitario = producto.precio,
                 )
-
                 producto.actualizar_activo()
 
             except Producto.DoesNotExist:
-                errores.append(f"Producto ID {item['id']} no encontrado.")
+                errores.append(f"Lo sentimos, uno de los productos ya no está disponible.")
 
         pedido.actualizar_total()
 
