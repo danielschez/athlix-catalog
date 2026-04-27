@@ -34,6 +34,19 @@ CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORI
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
 
+# Email
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 587
+EMAIL_USE_TLS       = True
+EMAIL_HOST_USER     = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL  = config('EMAIL_HOST_USER')
+
+# Correo del admin que recibirá las notificaciones
+ADMIN_EMAIL         = config('ADMIN_EMAIL')
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -94,7 +107,7 @@ ROOT_URLCONF = 'catalogo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'productos' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

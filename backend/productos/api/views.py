@@ -11,6 +11,11 @@ from .serializers import (
     ProductoSerializer, PedidoSerializer, DetallePedidoSerializer,
 )
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils import timezone
+
 
 class UsuarioRegistradoViewSet(viewsets.ModelViewSet):
     queryset         = UsuarioRegistrado.objects.all()
@@ -154,9 +159,75 @@ class CrearPedidoView(APIView):
 
         pedido.actualizar_total()
 
+        detalles_info = []
+        for det in pedido.detalles.select_related("producto").all():
+            talla_nombre = None
+            item_original = next(
+                (i for i in items if i["id"] == det.producto.id), None
+            )
+            if item_original and item_original.get("talla_id"):
+                try:
+                    pt = ProductoTalla.objects.get(
+                        producto=det.producto,
+                        talla_id=item_original["talla_id"]
+                    )
+                    talla_nombre = pt.talla.talla
+                except ProductoTalla.DoesNotExist:
+                    pass
+
+            imagen_url = None
+            if det.producto.imagen1:
+                imagen_url = request.build_absolute_uri(det.producto.imagen1.url)
+
+            detalles_info.append({
+                "producto":        det.producto.nombre,
+                "talla":           talla_nombre,
+                "cantidad":        det.cantidad,
+                "precio_unitario": f"{det.precio_unitario:,.2f}",
+                "subtotal":        f"{det.subtotal:,.2f}",
+                "imagen_url":      imagen_url,   # ← imagen
+            })
+
+        telefono_cliente = pedido.usuario.telefono or "No registrado"
+
+        if detalles_info:
+            enviar_correo_admin(pedido, detalles_info, errores, telefono_cliente)
+
+
         return Response({
             "pedido_id": pedido.id,
             "total":     str(pedido.total),
             "estado":    pedido.estado,
             "errores":   errores,
         }, status=status.HTTP_201_CREATED)
+    
+    
+def enviar_correo_admin(pedido, detalles_info, errores, telefono_cliente=""):
+    try:
+        contexto = {
+            "pedido_id":        pedido.id,
+            "fecha":            pedido.fecha.strftime("%d/%m/%Y %H:%M"),
+            "nombre_cliente":   pedido.usuario.nombre,
+            "correo_cliente":   pedido.usuario.correo,
+            "telefono_cliente": telefono_cliente,   # ← teléfono
+            "estado":           pedido.get_estado_display(),
+            "detalles":         detalles_info,
+            "total":            f"{pedido.total:,.2f}",
+            "errores":          errores,
+        }
+
+        html_content = render_to_string("emails/pedido_admin.html", contexto)
+
+        subject = f"🛒 Nuevo pedido #{pedido.id} — {pedido.usuario.nombre} — ${pedido.total:,.2f}"
+
+        msg = EmailMultiAlternatives(
+            subject    = subject,
+            body       = f"Nuevo pedido #{pedido.id} de {pedido.usuario.nombre}. Total: ${pedido.total:,.2f}",
+            from_email = settings.DEFAULT_FROM_EMAIL,
+            to         = [settings.ADMIN_EMAIL],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+    except Exception as e:
+        print(f"Error enviando correo: {e}")

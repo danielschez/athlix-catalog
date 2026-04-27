@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header { background: #111; color: #fff; padding: 24px 32px; }
+    .header h1 { margin: 0; font-size: 22px; }
+    .header p { margin: 4px 0 0; font-size: 14px; color: #aaa; }
+    .body { padding: 32px; }
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #888; letter-spacing: 0.05em; margin: 24px 0 12px; border-bottom: 2px solid #f0f0f0; padding-bottom: 6px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #666; }
+    .info-value { font-weight: 600; color: #111; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th { text-align: left; font-size: 12px; color: #888; text-transform: uppercase; padding: 8px 4px; border-bottom: 2px solid #f0f0f0; }
+    td { padding: 12px 4px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+    .product-img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; display: block; }
+    .product-img-placeholder { width: 64px; height: 64px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa; text-align: center; }
+    .total-row td { font-weight: 700; font-size: 16px; padding: 16px 4px; background: #f9f9f9; }
+    .badge { display: inline-block; background: #111; color: #fff; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .footer { background: #f9f9f9; padding: 20px 32px; text-align: center; font-size: 12px; color: #aaa; }
+    a { color: #111; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>🛒 Nuevo Pedido Recibido</h1>
+      <p>Pedido #{{ pedido_id }} — {{ fecha }}</p>
+    </div>
+
+    <div class="body">
+
+      <!-- Datos del cliente -->
+      <p class="section-title">Datos del cliente</p>
+      <div class="info-row">
+        <span class="info-label">Nombre</span>
+        <span class="info-value">{{ nombre_cliente }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Correo</span>
+        <span class="info-value">
+          <a href="mailto:{{ correo_cliente }}">{{ correo_cliente }}</a>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Teléfono</span>
+        <span class="info-value">
+          <a href="tel:{{ telefono_cliente }}">{{ telefono_cliente }}</a>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Estado del pedido</span>
+        <span class="info-value"><span class="badge">{{ estado }}</span></span>
+      </div>
+
+      <!-- Productos -->
+      <p class="section-title">Productos</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Producto</th>
+            <th>Talla</th>
+            <th>Cant.</th>
+            <th>P. Unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for detalle in detalles %}
+          <tr>
+            <td>
+              {% if detalle.imagen_url %}
+                <img src="{{ detalle.imagen_url }}" alt="{{ detalle.producto }}" class="product-img">
+              {% else %}
+                <div class="product-img-placeholder">Sin imagen</div>
+              {% endif %}
+            </td>
+            <td><strong>{{ detalle.producto }}</strong></td>
+            <td>{{ detalle.talla|default:"—" }}</td>
+            <td>{{ detalle.cantidad }}</td>
+            <td>${{ detalle.precio_unitario }}</td>
+            <td>${{ detalle.subtotal }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total-row">
+            <td colspan="5">Total del pedido</td>
+            <td>${{ total }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Errores de stock si los hay -->
+      {% if errores %}
+      <p class="section-title">⚠️ Productos con problemas de stock</p>
+      {% for error in errores %}
+      <p style="color: #b60808; font-size: 14px; margin: 4px 0;">• {{ error }}</p>
+      {% endfor %}
+      {% endif %}
+
+    </div>
+
+    <div class="footer">
+      Grillo Shop — Notificación automática de pedidos
+    </div>
+
+  </div>
+</body>
+</html>
