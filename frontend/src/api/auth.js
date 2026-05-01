@@ -2,7 +2,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export async function registrarUsuario({ nombre, correo, telefono, password, captchaToken }) {
-  const res = await fetch(`${BASE_URL}/usuarios/`, {
+  const res = await fetch(`${BASE_URL}/api/usuarios/`, {
     method:  "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nombre, correo, telefono, password, captcha: captchaToken }),
@@ -23,7 +23,6 @@ export async function loginUsuario({ correo, password }) {
   return data;
 }
 
-// Llama a endpoints protegidos con el token
 export async function fetchConAuth(url, opciones = {}) {
   const access = sessionStorage.getItem("access_token");
 
@@ -37,13 +36,11 @@ export async function fetchConAuth(url, opciones = {}) {
   });
 
   if (res.status === 401) {
-    // Token expirado — intenta refrescar
     const refreshed = await refrescarToken();
     if (!refreshed) {
       window.location.href = "/login";
       return;
     }
-    // Reintenta con el nuevo token
     return fetchConAuth(url, opciones);
   }
 
@@ -54,7 +51,7 @@ async function refrescarToken() {
   const refresh = sessionStorage.getItem("refresh_token");
   if (!refresh) return false;
 
-  const res = await fetch(`${BASE_URL}/auth/refresh/`, {
+  const res = await fetch(`${BASE_URL}/api/auth/refresh/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh }),
