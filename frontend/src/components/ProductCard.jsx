@@ -29,6 +29,7 @@ export default function ProductCard({ product }) {
 
   const nombre      = product.nombre || product.name || "Producto";
   const precio      = product.precio || product.price || 0;
+  const descripcion = product.descripcion || "";
   const tallas      = Array.isArray(product.tallas) ? product.tallas : [];
   const tieneTallas = tallas.length > 0;
 
@@ -114,6 +115,8 @@ export default function ProductCard({ product }) {
       <div className="product-info">
         {product.tag && <span className="product-tag">{product.tag}</span>}
         <h3 className="product-name">{nombre}</h3>
+
+        {descripcion && <p className="product-description">{descripcion}</p>}
 
         {tieneTallas && (
           <div className="product-sizes">
