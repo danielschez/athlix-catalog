@@ -116,7 +116,11 @@ export default function ProductCard({ product }) {
         {product.tag && <span className="product-tag">{product.tag}</span>}
         <h3 className="product-name">{nombre}</h3>
 
-        {descripcion && <p className="product-description">{descripcion}</p>}
+        {descripcion && (
+          <p className="product-description" style={{ color: "#000" }}>
+            {descripcion}
+          </p>
+        )}
 
         {tieneTallas && (
           <div className="product-sizes">
