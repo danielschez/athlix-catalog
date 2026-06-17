@@ -1,9 +1,11 @@
 // src/App.jsx
+// src/App.jsx
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Calzado from "./pages/Calzado";
 import Ropa from "./pages/Ropa";
+import Jersey from "./pages/Jersey";
 import Accesorios from "./pages/Accesorios";
 import Gorras from "./pages/Gorras";
 import Uniformes from "./pages/Uniformes";
@@ -26,6 +28,7 @@ function AppWrapper() {
         <Route path="/" element={<Home />} />
         <Route path="/calzado" element={<Calzado />} />
         <Route path="/ropa" element={<Ropa />} />
+        <Route path="/jerseys" element={<Jersey />} />
         <Route path="/accesorios" element={<Accesorios />} />
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/gorras" element={<Gorras />} />

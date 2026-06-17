@@ -5,27 +5,32 @@ import { Link } from "react-router-dom";
 const categories = [
   {
     title: "Calzado",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+    image: "/images/Tenis.jpeg",
     path: "/calzado",
   },
   {
     title: "Ropa",
-    image: "https://images.unsplash.com/photo-1521334884684-d80222895322",
+    image: "/images/Ropa.jpeg",
     path: "/ropa",
   },
   {
     title: "Gorras",
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b",
+    image: "/images/Gorras.jpeg",
     path: "/gorras",
   },
   {
+    title: "Jerseys",
+    image: "/images/Jersey.jpeg",
+    path: "/jerseys",
+  },
+  {
     title: "Uniformes",
-    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55",
+    image: "/images/Uniformes.jpeg",
     path: "/uniformes",
   },
   {
-    title: "Accesorios",
-    image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519",
+    title: "Accesorio y Complementos",
+    image: "/images/Acessorios.jpeg",
     path: "/accesorios",
   },
 ];

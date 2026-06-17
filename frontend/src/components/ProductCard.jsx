@@ -62,7 +62,7 @@ export default function ProductCard({ product }) {
 
     const itemEnCarrito = cart.find((item) =>
       item.id === product.id &&
-      (item.talla_id || null) === (tallaSeleccionada?.talla || null)  // 👈 CAMBIADO: usa .talla en vez de .id
+      (item.talla_id || null) === (tallaSeleccionada?.talla || null) 
     );
     const cantidadEnCarrito = itemEnCarrito?.quantity || 0;
 
@@ -80,7 +80,7 @@ export default function ProductCard({ product }) {
       nombre,
       precio:   Number(precio),
       imagen:   imagenes[0],
-      talla_id: tallaSeleccionada?.talla || null,  // 👈 CAMBIADO: usa .talla (que es el FK a Talla)
+      talla_id: tallaSeleccionada?.talla || null,
       talla:    tallaSeleccionada?.talla_nombre || null,
     });
 
