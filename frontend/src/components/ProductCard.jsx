@@ -13,9 +13,10 @@ function resolverImagen(url) {
 export default function ProductCard({ product }) {
   const { addToCart, cart } = useCart();
 
-  const [imgIndex, setImgIndex]             = useState(0);
-  const [error, setError]                   = useState("");
+  const [imgIndex, setImgIndex]                   = useState(0);
+  const [error, setError]                         = useState("");
   const [tallaSeleccionada, setTallaSeleccionada] = useState(null);
+  const [zoomAbierto, setZoomAbierto]             = useState(false);
 
   const imagenes = [
     resolverImagen(product.imagen1),
@@ -63,7 +64,7 @@ export default function ProductCard({ product }) {
 
     const itemEnCarrito = cart.find((item) =>
       item.id === product.id &&
-      (item.talla_id || null) === (tallaSeleccionada?.talla || null) 
+      (item.talla_id || null) === (tallaSeleccionada?.talla || null)
     );
     const cantidadEnCarrito = itemEnCarrito?.quantity || 0;
 
@@ -90,75 +91,131 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <article className="product-card">
-      <div className="image-wrapper">
-        <img src={imagenes[imgIndex]} alt={`${nombre} ${imgIndex + 1}`} loading="lazy" />
+    <>
+      {/* ── Modal de zoom ───────────────────────────────────────── */}
+      {zoomAbierto && (
+        <div
+          onClick={() => setZoomAbierto(false)}
+          style={{
+            position:        "fixed",
+            inset:           0,
+            zIndex:          1000,
+            backgroundColor: "rgba(0,0,0,0.85)",
+            display:         "flex",
+            alignItems:      "center",
+            justifyContent:  "center",
+            cursor:          "zoom-out",
+          }}
+        >
+          <img
+            src={imagenes[imgIndex]}
+            alt={nombre}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth:     "90vw",
+              maxHeight:    "90vh",
+              objectFit:    "contain",
+              borderRadius: "8px",
+              boxShadow:    "0 8px 32px rgba(0,0,0,0.6)",
+            }}
+          />
+          <button
+            onClick={() => setZoomAbierto(false)}
+            style={{
+              position:        "absolute",
+              top:             "16px",
+              right:           "20px",
+              background:      "none",
+              border:          "none",
+              color:           "#fff",
+              fontSize:        "2rem",
+              cursor:          "pointer",
+              lineHeight:      1,
+            }}
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
-        {imagenes.length > 1 && (
-          <>
-            <button type="button" className="carousel-btn carousel-btn--prev" onClick={prev}>‹</button>
-            <button type="button" className="carousel-btn carousel-btn--next" onClick={next}>›</button>
-            <div className="carousel-dots">
-              {imagenes.map((_, i) => (
+      {/* ── Tarjeta ─────────────────────────────────────────────── */}
+      <article className="product-card">
+        <div className="image-wrapper">
+          <img
+            src={imagenes[imgIndex]}
+            alt={`${nombre} ${imgIndex + 1}`}
+            loading="lazy"
+            onClick={() => setZoomAbierto(true)}
+            style={{ cursor: "zoom-in" }}
+          />
+
+          {imagenes.length > 1 && (
+            <>
+              <button type="button" className="carousel-btn carousel-btn--prev" onClick={prev}>‹</button>
+              <button type="button" className="carousel-btn carousel-btn--next" onClick={next}>›</button>
+              <div className="carousel-dots">
+                {imagenes.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`carousel-dot ${i === imgIndex ? "active" : ""}`}
+                    onClick={(e) => { e.stopPropagation(); setImgIndex(i); }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="product-info">
+          {product.tag && <span className="product-tag">{product.tag}</span>}
+          <h3 className="product-name">{nombre}</h3>
+
+          {descripcion && (
+            <p className="product-description" style={{ color: "#000" }}>
+              {descripcion}
+            </p>
+          )}
+
+          {tieneTallas && (
+            <div className="product-sizes">
+              {tallas.map((talla) => (
                 <button
-                  key={i}
+                  key={talla.id}
                   type="button"
-                  className={`carousel-dot ${i === imgIndex ? "active" : ""}`}
-                  onClick={(e) => { e.stopPropagation(); setImgIndex(i); }}
-                />
+                  className={`size-badge ${tallaSeleccionada?.id === talla.id ? "active" : ""} ${talla.stock === 0 ? "agotada" : ""}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    seleccionarTalla(talla);
+                  }}
+                  disabled={talla.stock === 0}
+                  title={talla.stock === 0 ? "Agotado" : `${talla.stock} disponibles`}
+                >
+                  {talla.talla_nombre}
+                </button>
               ))}
             </div>
-          </>
-        )}
-      </div>
+          )}
 
-      <div className="product-info">
-        {product.tag && <span className="product-tag">{product.tag}</span>}
-        <h3 className="product-name">{nombre}</h3>
-
-        {descripcion && (
-          <p className="product-description" style={{ color: "#000" }}>
-            {descripcion}
+          <p className="product-price">
+            ${Number(precio).toLocaleString("es-MX")}
           </p>
-        )}
 
-        {tieneTallas && (
-          <div className="product-sizes">
-            {tallas.map((talla) => (
-              <button
-                key={talla.id}
-                type="button"
-                className={`size-badge ${tallaSeleccionada?.id === talla.id ? "active" : ""} ${talla.stock === 0 ? "agotada" : ""}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  seleccionarTalla(talla);
-                }}
-                disabled={talla.stock === 0}
-                title={talla.stock === 0 ? "Agotado" : `${talla.stock} disponibles`}
-              >
-                {talla.talla_nombre}
-              </button>
-            ))}
-          </div>
-        )}
+          {tallaSeleccionada && (
+            <p className="stock-info">
+              {tallaSeleccionada.stock} disponibles en talla {tallaSeleccionada.talla_nombre}
+            </p>
+          )}
 
-        <p className="product-price">
-          ${Number(precio).toLocaleString("es-MX")}
-        </p>
+          {error && <div className="product-error-message">{error}</div>}
 
-        {tallaSeleccionada && (
-          <p className="stock-info">
-            {tallaSeleccionada.stock} disponibles en talla {tallaSeleccionada.talla_nombre}
-          </p>
-        )}
-
-        {error && <div className="product-error-message">{error}</div>}
-
-        <button type="button" className="add-to-cart-btn" onClick={handleAgregarAlCarrito}>
-          🛒 Añadir al carrito
-        </button>
-      </div>
-    </article>
+          <button type="button" className="add-to-cart-btn" onClick={handleAgregarAlCarrito}>
+            🛒 Añadir al carrito
+          </button>
+        </div>
+      </article>
+    </>
   );
 }
